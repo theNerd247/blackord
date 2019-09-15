@@ -91,7 +91,7 @@ options =
 
 viewPlayer : Player -> List (Position, Tile msg)
 viewPlayer player = 
-  [ (player.position, (0,0) |> Tile.fromPosition |> Tile.movable "player")
+  [ (player.position, Tile.fromPosition (0,0) |> Tile.movable "player")
   ]
 
 areas : Model -> List (Area Msg)
