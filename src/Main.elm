@@ -1,6 +1,7 @@
+import Color exposing (rgb255)
 import Grid exposing (Grid)
-import Grid.Position exposing (Position)
-import Grid.Direction exposing (Direction(..), Coord)
+import Grid.Position as Position exposing (Position, Coord)
+import Grid.Direction exposing (Direction(..))
 import PixelEngine.Options as Options exposing (Options)
 import PixelEngine
     exposing
@@ -8,6 +9,7 @@ import PixelEngine
         , Input(..)
         , PixelEngine
         , game
+        , colorBackground
         )
 import PixelEngine.Options exposing (Options)
 import PixelEngine.Tile as Tile exposing (Tile)
@@ -31,9 +33,11 @@ tileSize = 30
 width : Float
 width = toFloat <| boardSize * tileSize
 
-let initPlayer = { position = (0, 0) }
+initPlayer : Player
+initPlayer = { position = (0, 0) }
 
-let initModel = { player = { position = initPosition })
+initModel : Model
+initModel = { player = initPlayer }
 
 init : () -> (Model, Cmd Msg)
 init _ = (initModel, Cmd.none)
@@ -43,16 +47,16 @@ controls : Input -> Maybe Msg
 controls input =
     case input of
         InputUp ->
-            Just <| Look Up
+            Just <| MovePlayer Up
 
         InputDown ->
-            Just <| Look Down
+            Just <| MovePlayer Down
 
         InputLeft ->
-            Just <| Look Left
+            Just <| MovePlayer Left
 
         InputRight ->
-            Just <| Look Right
+            Just <| MovePlayer Right
 
         _ ->
             Nothing
@@ -70,22 +74,56 @@ movePlayer direction player =
                 |> Position.add dirVec
                 |> Tuple.mapBoth (modBy boardSize) (modBy boardSize)
     in
-      player { position = newPos }
+      { player | position = newPos }
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = 
   case msg of
-    MovePlayer d -> (model { player = movePlayer d model.player }, Cmd.none)
+    MovePlayer d -> ({ model | player = movePlayer d model.player }, Cmd.none)
 
 subscriptions : Model -> Sub Msg
-subscriptions = Sub.none
+subscriptions _ = Sub.none
+
+options : Options Msg
+options =
+    Options.default
+        |> Options.withMovementSpeed 0.8
+
+viewPlayer : Player -> List (Position, Tile msg)
+viewPlayer player = 
+  [ (player.position, (0,0) |> Tile.fromPosition |> Tile.movable "player")
+  ]
+
+areas : Model -> List (Area Msg)
+areas { player } =
+    [ PixelEngine.tiledArea
+        { rows = boardSize
+        , tileset =
+            { source       = ""
+            , spriteWidth  = tileSize
+            , spriteHeight = tileSize
+            }
+        , background = colorBackground (rgb255 20 12 28)
+        }
+        ( viewPlayer player 
+        )
+    ]
+
+view :
+    Model
+    -> { title : String, options : Maybe (Options Msg), body : List (Area Msg) }
+view model =
+    { title = "BlackOrd"
+    , options = Just options
+    , body = areas model
+    }
 
 main : PixelEngine () Model Msg
 main = game 
   { init = init
   , update = update
   , subscriptions = subscriptions
-  , view
+  , view = view
   , controls = controls
   , width = width
   }
