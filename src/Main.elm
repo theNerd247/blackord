@@ -99,11 +99,11 @@ areas { player } =
     [ PixelEngine.tiledArea
         { rows = boardSize
         , tileset =
-            { source       = ""
+            { source       = "img/man.png"
             , spriteWidth  = tileSize
             , spriteHeight = tileSize
             }
-        , background = colorBackground (rgb255 20 12 28)
+        , background = colorBackground (rgb255 255 255 255)
         }
         ( viewPlayer player 
         )
