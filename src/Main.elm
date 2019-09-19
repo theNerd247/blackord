@@ -18,8 +18,16 @@ type alias Player =
   { position : Position
   }
 
+type alias Size = (Int, Int)
+
+type alias Platform = 
+  { position : Position
+  , size     : Size 
+  }
+
 type alias Model = 
   { player : Player
+  , platform : Platform
   }
 
 type Msg = MovePlayer Direction
@@ -36,8 +44,11 @@ width = toFloat <| boardSize * tileSize
 initPlayer : Player
 initPlayer = { position = (0, 0) }
 
+initPlatform : Platform
+initPlatform = { position = (10, 10), size = (3,4) }
+
 initModel : Model
-initModel = { player = initPlayer }
+initModel = { player = initPlayer, platform = initPlatform }
 
 init : () -> (Model, Cmd Msg)
 init _ = (initModel, Cmd.none)
