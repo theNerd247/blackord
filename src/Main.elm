@@ -100,13 +100,29 @@ options =
     Options.default
         |> Options.withMovementSpeed 0.8
 
-viewPlayer : Player -> List (Position, Tile msg)
-viewPlayer player = 
-  [ (player.position, Tile.fromPosition (0,0) |> Tile.movable "player")
+viewPlayer : Model -> List (Position, Tile msg)
+viewPlayer {player, platform } = List.concat 
+  [ playerTile player 
+  , platformTile platform 
   ]
 
+playerTile : Player -> List (Position, Tile msg)
+playerTile player = 
+  [( player.position
+  ,  Tile.fromPosition (0,0) |> Tile.movable "player"|> Tile.jumping 
+  )]
+
+platformTile : Platform -> List (Position, Tile msg)
+platformTile platform = 
+  List.range 0 ((Tuple.first platform.size)-1)
+    |> List.concatMap (\i -> 
+        [( platform.position |> Tuple.mapFirst (\x -> x+i)
+        ,  Tile.fromPosition (0,0)
+        )]
+      )
+
 areas : Model -> List (Area Msg)
-areas { player } =
+areas model =
     [ PixelEngine.tiledArea
         { rows = boardSize
         , tileset =
@@ -116,7 +132,7 @@ areas { player } =
             }
         , background = colorBackground (rgb255 255 255 255)
         }
-        ( viewPlayer player 
+        ( viewPlayer model 
         )
     ]
 
