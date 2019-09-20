@@ -72,6 +72,17 @@ controls input =
         _ ->
             Nothing
 
+dot : Position -> Position -> Int
+dot p1 p2 = (Tuple.first p2) * (Tuple.first p1) + (Tuple.second p2) * (Tuple.second p1)
+
+magnitude : Position -> Position -> Int
+magnitude p1 p2 = 
+  let x = ((Tuple.first p2) - (Tuple.first p1) , (Tuple.second p2) - (Tuple.second p1))
+  in dot x x
+
+checkCollision : Position -> Position -> Bool
+checkCollision p1 p2 = magnitude p1 p2 <= 4
+
 movePlayer : Direction -> Player -> Player
 movePlayer direction player =
     let
