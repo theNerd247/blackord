@@ -59,9 +59,10 @@ initPlatform : Platform
 initPlatform = 
   Grid.fill 
     (\(x,y) -> 
-      if y == 15 && x > 10 && x < 20
-      then
+      if y == 15 && x > 10 && x < 20 then
         Just Platform
+      else if y == 14 && x > 10 && x < 20 then
+        Just Coin
       else 
         Nothing
     )
@@ -152,6 +153,7 @@ areas { platform, player} =
                   ( pos
                   , case entity of 
                       Platform -> platformTile
+                      Coin     -> coinTile
                       _        -> emptyTile
                   )
                 )
@@ -170,3 +172,6 @@ platformTile = Tile.fromPosition (1,0)
 
 emptyTile : Tile Msg
 emptyTile = Tile.fromPosition (0, 0)
+
+coinTile : Tile Msg
+coinTile = Tile.fromPosition (0,0)
