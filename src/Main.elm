@@ -151,7 +151,7 @@ areas { platform, player} =
                 (\(pos, entity) ->
                   ( pos
                   , case entity of 
-                      Platform -> playerTile
+                      Platform -> platformTile
                       _        -> emptyTile
                   )
                 )
@@ -161,12 +161,12 @@ areas { platform, player} =
 
 playerTile : Tile Msg
 playerTile = 
-  Tile.fromPosition (0,0) 
+  Tile.fromPosition (0,1) 
     |> Tile.movable "player"
     |> Tile.jumping 
 
 platformTile : Tile Msg
-platformTile = Tile.fromPosition (0,0)
+platformTile = Tile.fromPosition (1,0)
 
 emptyTile : Tile Msg
 emptyTile = Tile.fromPosition (0, 0)
