@@ -48,7 +48,7 @@ initPlatform : Platform
 initPlatform = 
   Grid.fill 
     (\(x,y) -> 
-      if x == 15 && y > 15 && y < 20
+      if y == 15 && x > 10 && x < 20
       then
         Just Platform
       else 
