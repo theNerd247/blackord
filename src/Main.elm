@@ -101,9 +101,6 @@ update msg ({player, platform} as model) =
       , Cmd.none
       )
 
-checkCollision : Position -> Position -> Bool
-checkCollision p1 p2 = p1 == p2 
-
 checkAndMove : Grid.Grid Entity -> Direction -> Player -> Player
 checkAndMove grid direction player = 
   player.position
@@ -116,6 +113,9 @@ checkAndMove grid direction player =
               (Just Platform) -> player
               _               -> { player | position = newPos }
       )
+
+withGravity : Position -> Position
+withGravity = Position.move 1 Down
 
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.none
