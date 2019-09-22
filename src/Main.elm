@@ -32,6 +32,17 @@ type alias Model =
 
 type Msg = MovePlayer Direction
 
+
+main : PixelEngine () Model Msg
+main = game 
+  { init = init
+  , update = update
+  , subscriptions = subscriptions
+  , view = view
+  , controls = controls
+  , width = width
+  }
+
 boardSize : Int 
 boardSize = 30
 
@@ -82,6 +93,14 @@ controls input =
         _ ->
             Nothing
 
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg ({player, platform} as model) = 
+  case msg of
+    MovePlayer direction -> 
+      ({ model | player = checkAndMove platform direction player }
+      , Cmd.none
+      )
+
 checkCollision : Position -> Position -> Bool
 checkCollision p1 p2 = p1 == p2 
 
@@ -98,14 +117,6 @@ checkAndMove grid direction player =
               _               -> { player | position = newPos }
       )
 
-update : Msg -> Model -> (Model, Cmd Msg)
-update msg ({player, platform} as model) = 
-  case msg of
-    MovePlayer direction -> 
-      ({ model | player = checkAndMove platform direction player }
-      , Cmd.none
-      )
-
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.none
 
@@ -113,6 +124,15 @@ options : Options Msg
 options =
     Options.default
         |> Options.withMovementSpeed 0.8
+
+view :
+    Model
+    -> { title : String, options : Maybe (Options Msg), body : List (Area Msg) }
+view model =
+    { title = "BlackOrd"
+    , options = Just options
+    , body = areas model
+    }
 
 areas : Model -> List (Area Msg)
 areas { platform, player} =
@@ -150,22 +170,3 @@ platformTile = Tile.fromPosition (0,0)
 
 emptyTile : Tile Msg
 emptyTile = Tile.fromPosition (0, 0)
-
-view :
-    Model
-    -> { title : String, options : Maybe (Options Msg), body : List (Area Msg) }
-view model =
-    { title = "BlackOrd"
-    , options = Just options
-    , body = areas model
-    }
-
-main : PixelEngine () Model Msg
-main = game 
-  { init = init
-  , update = update
-  , subscriptions = subscriptions
-  , view = view
-  , controls = controls
-  , width = width
-  }
