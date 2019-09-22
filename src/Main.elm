@@ -115,7 +115,7 @@ options =
         |> Options.withMovementSpeed 0.8
 
 areas : Model -> List (Area Msg)
-areas model =
+areas { platform, player} =
     [ PixelEngine.tiledArea
         { rows = boardSize
         , tileset =
@@ -125,20 +125,31 @@ areas model =
             }
         , background = colorBackground (rgb255 255 255 255)
         }
-        ( viewPlayer model 
+        ( platform
+            |> Grid.toList
+            |> List.map 
+                (\(pos, entity) ->
+                  ( pos
+                  , case entity of 
+                      Platform -> playerTile
+                      _        -> emptyTile
+                  )
+                )
+            |> (::) (player.position, playerTile)
         )
     ]
 
-viewPlayer : Model -> List (Position, Tile msg)
-viewPlayer {player, platform } = List.concat 
-  [ playerTile player 
-  ]
+playerTile : Tile Msg
+playerTile = 
+  Tile.fromPosition (0,0) 
+    |> Tile.movable "player"
+    |> Tile.jumping 
 
-playerTile : Player -> List (Position, Tile msg)
-playerTile player = 
-  [( player.position
-  ,  Tile.fromPosition (0,0) |> Tile.movable "player"|> Tile.jumping 
-  )]
+platformTile : Tile Msg
+platformTile = Tile.fromPosition (0,0)
+
+emptyTile : Tile Msg
+emptyTile = Tile.fromPosition (0, 0)
 
 view :
     Model
