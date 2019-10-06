@@ -60,9 +60,10 @@ initPlatform : Platform
 initPlatform = 
   Grid.fill 
     (\(x,y) -> 
-      if y == 15 && x > 10 && x < 20
-      then
+      if y == 15 && x > 10 && x < 20 then
         Just Platform
+      else if y == 14 && x > 10 && x < 20 then
+        Just Coin
       else 
         Nothing
     )
@@ -105,9 +106,6 @@ update msg ({player, platform} as model) =
       , Cmd.none
       )
 
-checkCollision : Position -> Position -> Bool
-checkCollision p1 p2 = p1 == p2 
-
 checkAndMove : Grid.Grid Entity -> Direction -> Player -> Player
 checkAndMove grid direction player = 
   player.position
@@ -120,6 +118,9 @@ checkAndMove grid direction player =
               (Just Platform) -> player
               _               -> { player | position = newPos }
       )
+
+withGravity : Position -> Position
+withGravity = Position.move 1 Down
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -156,7 +157,8 @@ areas { platform, player} =
                 (\(pos, entity) ->
                   ( pos
                   , case entity of 
-                      Platform -> playerTile
+                      Platform -> platformTile
+                      Coin     -> coinTile
                       _        -> emptyTile
                   )
                 )
@@ -166,12 +168,15 @@ areas { platform, player} =
 
 playerTile : Tile Msg
 playerTile = 
-  Tile.fromPosition (0,0) 
+  Tile.fromPosition (0,1) 
     |> Tile.movable "player"
     |> Tile.jumping 
 
 platformTile : Tile Msg
-platformTile = Tile.fromPosition (0,0)
+platformTile = Tile.fromPosition (1,0)
 
 emptyTile : Tile Msg
 emptyTile = Tile.fromPosition (0, 0)
+
+coinTile : Tile Msg
+coinTile = Tile.fromPosition (0,0)
