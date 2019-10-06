@@ -104,9 +104,12 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg ({player, platform} as model) = 
   case msg of
     MovePlayer direction -> 
-      ({ model | player = checkAndMove platform direction player }
-      , Cmd.none
-      )
+      let
+        (g, p) = 
+          checkAndMove platform direction player 
+          |> coinPickup platform
+      in
+        ({ model | player = p, platform = g } , Cmd.none)
 
 checkAndMove : Grid.Grid Entity -> Direction -> Player -> Player
 checkAndMove grid direction player = 
