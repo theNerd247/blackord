@@ -91,6 +91,9 @@ controls input =
         InputRight ->
             Just <| MovePlayer Right
 
+        InputA ->
+            Just <| MovePlayer Up
+
         _ ->
             Nothing
 
