@@ -3,6 +3,7 @@ import Color exposing (rgb255)
 import Grid.Position as Position exposing (Position, Coord)
 import Grid.Direction exposing (Direction(..))
 import PixelEngine.Options as Options exposing (Options)
+import Time
 import PixelEngine
     exposing
         ( Area
@@ -118,7 +119,8 @@ checkAndMove grid direction player =
       )
 
 subscriptions : Model -> Sub Msg
-subscriptions _ = Sub.none
+subscriptions _ =
+   Time.every 20 (MovePlayer Down |> always)
 
 options : Options Msg
 options =
