@@ -14,6 +14,7 @@ import PixelEngine
         )
 import PixelEngine.Options exposing (Options)
 import PixelEngine.Tile as Tile exposing (Tile)
+import PixelEngine.Image as Image
 
 type alias Player = 
   { position : Position
@@ -55,7 +56,7 @@ width : Float
 width = toFloat <| boardSize * tileSize
 
 initPlayer : Player
-initPlayer = { position = (0, 0) , coinCount = 1}
+initPlayer = { position = (0, 0) , coinCount = 0}
 
 initPlatform : Platform
 initPlatform = 
@@ -142,30 +143,54 @@ view model =
     }
 
 areas : Model -> List (Area Msg)
-areas { platform, player} =
-    [ PixelEngine.tiledArea
-        { rows = boardSize
-        , tileset =
-            { source       = "img/man.png"
-            , spriteWidth  = tileSize
-            , spriteHeight = tileSize
-            }
-        , background = colorBackground (rgb255 255 255 255)
-        }
-        ( platform
-            |> Grid.toList
-            |> List.map 
-                (\(pos, entity) ->
-                  ( pos
-                  , case entity of 
-                      Platform -> platformTile
-                      Coin     -> coinTile
-                      _        -> emptyTile
-                  )
-                )
-            |> (::) (player.position, playerTile)
-        )
+areas model = 
+  [ scoreArea model
+  , gameArea model 
+  ]
+
+scoreArea : Model -> Area Msg
+scoreArea model = 
+  PixelEngine.imageArea
+    { height = 30
+    , background = colorBackground (rgb255 255 255 255)
+    }
+    [ ((0,0), Image.fromText (coinCountStr model) font) 
     ]
+
+coinCountStr : Model -> String
+coinCountStr = .player >> .coinCount >> String.fromInt >> String.append "Coins - "
+
+font : Tile.Tileset
+font = Tile.tileset
+  { source       = "img/font.png"
+  , spriteWidth  = 16
+  , spriteHeight = 16
+  }
+
+gameArea : Model -> Area Msg
+gameArea { platform, player} =
+  PixelEngine.tiledArea
+      { rows = boardSize
+      , tileset =
+          { source       = "img/man.png"
+          , spriteWidth  = tileSize
+          , spriteHeight = tileSize
+          }
+      , background = colorBackground (rgb255 255 255 255)
+      }
+      ( platform
+          |> Grid.toList
+          |> List.map 
+              (\(pos, entity) ->
+                ( pos
+                , case entity of 
+                    Platform -> platformTile
+                    Coin     -> coinTile
+                    _        -> emptyTile
+                )
+              )
+          |> (::) (player.position, playerTile)
+      )
 
 playerTile : Tile Msg
 playerTile = 
