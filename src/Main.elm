@@ -121,6 +121,20 @@ checkAndMove grid direction player =
               _               -> { player | position = newPos }
       )
 
+coinPickup : Grid.Grid Entity -> Player -> (Grid.Grid Entity, Player)
+coinPickup grid player = 
+  Grid.get (player.position) grid
+    |> Result.map (\entity ->
+        case entity of
+          (Just Coin) -> 
+            ( Grid.remove player.position grid |> Result.withDefault grid
+            , { player | coinCount = player.coinCount + 1}
+            )
+          _ -> (grid, player)
+      )
+    |> Result.withDefault (grid, player)
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.none
    -- Time.every 20 (MovePlayer Down |> always)
