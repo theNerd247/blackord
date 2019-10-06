@@ -17,6 +17,7 @@ import PixelEngine.Tile as Tile exposing (Tile)
 
 type alias Player = 
   { position : Position
+  , coinCount : Int
   }
 
 type Entity =
@@ -54,7 +55,7 @@ width : Float
 width = toFloat <| boardSize * tileSize
 
 initPlayer : Player
-initPlayer = { position = (0, 0) }
+initPlayer = { position = (0, 0) , coinCount = 1}
 
 initPlatform : Platform
 initPlatform = 
@@ -123,8 +124,8 @@ withGravity : Position -> Position
 withGravity = Position.move 1 Down
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-   Time.every 20 (MovePlayer Down |> always)
+subscriptions _ = Sub.none
+   -- Time.every 20 (MovePlayer Down |> always)
 
 options : Options Msg
 options =
