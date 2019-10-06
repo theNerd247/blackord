@@ -121,9 +121,6 @@ checkAndMove grid direction player =
               _               -> { player | position = newPos }
       )
 
-withGravity : Position -> Position
-withGravity = Position.move 1 Down
-
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.none
    -- Time.every 20 (MovePlayer Down |> always)
