@@ -17,14 +17,16 @@ import PixelEngine.Tile as Tile exposing (Tile)
 import PixelEngine.Image as Image
 
 type alias Player = 
-  { position : Position
-  , coinCount : Int
+  { position    : Position
+  , coinCount   : Int
+  , markerCount : Int
   }
+
+type Item = Coin | Marker
 
 type Entity =
     Platform
-  | Coin
-  | Marker
+  | EntityItem Item
 
 type alias Platform = Grid.Grid Entity
 
@@ -56,7 +58,7 @@ width : Float
 width = toFloat <| boardSize * tileSize
 
 initPlayer : Player
-initPlayer = { position = (0, 0) , coinCount = 0}
+initPlayer = { position = (0, 0), coinCount = 0, markerCount = 0 }
 
 initPlatform : Platform
 initPlatform = 
@@ -65,7 +67,7 @@ initPlatform =
       if y == 15 && x > 10 && x < 20 then
         Just Platform
       else if y == 14 && x > 10 && x < 20 then
-        Just Coin
+        Just (EntityItem Coin)
       else 
         Nothing
     )
@@ -107,7 +109,7 @@ update msg ({player, platform} as model) =
       let
         (g, p) = 
           checkAndMove platform direction player 
-          |> coinPickup platform
+          |> itemPickup platform
       in
         ({ model | player = p, platform = g } , Cmd.none)
 
@@ -124,19 +126,24 @@ checkAndMove grid direction player =
               _               -> { player | position = newPos }
       )
 
-coinPickup : Grid.Grid Entity -> Player -> (Grid.Grid Entity, Player)
-coinPickup grid player = 
+itemPickup : Grid.Grid Entity -> Player -> (Grid.Grid Entity, Player)
+itemPickup grid player = 
   Grid.get (player.position) grid
     |> Result.map (\entity ->
         case entity of
-          (Just Coin) -> 
+          (Just (EntityItem item)) -> 
             ( Grid.remove player.position grid |> Result.withDefault grid
-            , { player | coinCount = player.coinCount + 1}
+            , addItemCount item player
             )
           _ -> (grid, player)
       )
     |> Result.withDefault (grid, player)
 
+addItemCount : Item -> Player -> Player
+addItemCount item player = 
+  case item of
+    Coin -> { player | coinCount = player.coinCount + 1}
+    Marker -> { player | markerCount = player.markerCount + 1}
 
 subscriptions : Model -> Sub Msg
 subscriptions _ = Sub.none
@@ -169,10 +176,14 @@ scoreArea model =
     , background = colorBackground (rgb255 255 255 255)
     }
     [ ((0,0), Image.fromText (coinCountStr model) font) 
+    , ((160,0), Image.fromText (markerCountStr model) font) 
     ]
 
 coinCountStr : Model -> String
 coinCountStr = .player >> .coinCount >> String.fromInt >> String.append "Coins - "
+
+markerCountStr : Model -> String
+markerCountStr = .player >> .markerCount >> String.fromInt >> String.append "Markers - "
 
 font : Tile.Tileset
 font = Tile.tileset
@@ -198,9 +209,9 @@ gameArea { platform, player} =
               (\(pos, entity) ->
                 ( pos
                 , case entity of 
-                    Platform -> platformTile
-                    Coin     -> coinTile
-                    _        -> emptyTile
+                    Platform          -> platformTile
+                    (EntityItem Coin) -> coinTile
+                    _                 -> emptyTile
                 )
               )
           |> (::) (player.position, playerTile)
